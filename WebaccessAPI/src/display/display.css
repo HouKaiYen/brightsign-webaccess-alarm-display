@@ -1,0 +1,208 @@
+@font-face {
+  font-family: 'Noto Sans TC';
+  src: url('/fonts/NotoSansTC.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  font-family: "Noto Sans TC", "Source Han Sans TC", "Microsoft JhengHei", sans-serif;
+  background: #000;
+  color: #f5f7fa;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #display-root {
+  width: 100%;
+  height: 100%;
+  min-width: 320px;
+  min-height: 240px;
+  margin: 0;
+  overflow: hidden;
+}
+
+.display-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+.display-header {
+  flex: 0 0 auto;
+  max-height: 40%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 1rem;
+  overflow: hidden;
+}
+
+.connection-status {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  max-width: 100%;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid #2d7b5a;
+  border-radius: 999px;
+  background: #103522;
+  color: #d7fbe6;
+  font-size: 15px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.connection-status.is-offline {
+  border-color: #ad4040;
+  background: #451d23;
+  color: #ffe4e4;
+}
+
+.alarm-list {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-color: #667b97 #172130;
+}
+
+.alarm-row {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem 0.65rem;
+  border: 0;
+  background: #000;
+  font-size: clamp(24px, 2.2vw, 40px);
+  line-height: 1.5;
+}
+
+.alarm-row-text { white-space: pre-wrap; text-align: center; font-weight: 700; letter-spacing: 0.04em; min-width: 0; overflow-wrap: break-word; word-break: break-word; }
+.alarm-row-time { flex: 0 0 auto; color: #d5d5d5; font-size: 0.72em; white-space: nowrap; }
+
+.plan-viewport {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 0.35rem;
+}
+
+.floor-plan-layer {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  max-height: 100%;
+  line-height: 0;
+  border-radius: 14px;
+}
+
+.plan-viewport.has-alarm { background: #000; padding: 18px; }
+.plan-viewport.has-alarm .floor-plan-layer { box-shadow: 0 0 0 8px #e51c23; }
+
+.floor-plan-image {
+  background: #fff;
+  border-radius: inherit;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.marker-layer { position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; }
+
+.alarm-marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.alarm-marker-image, .alarm-marker-built-in, .alarm-marker-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.alarm-marker-built-in svg { display: block; width: 100%; height: 100%; }
+.alarm-marker-fallback { color: #ff4545; font-size: 100%; text-align: center; }
+.alarm-marker.should-blink { animation: alarm-blink 1s steps(2, start) infinite; }
+
+@keyframes alarm-blink { to { visibility: hidden; } }
+
+.page-image-error, .idle-screen {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+}
+
+.display-header[hidden], .plan-viewport[hidden], .idle-screen[hidden],
+.alarm-list[hidden], .page-image-error[hidden], .marker-layer[hidden] {
+  display: none !important;
+}
+
+.page-image-error { color: #ffd5d5; font-size: 28px; }
+.idle-screen { position: relative; flex: 1 1 auto; min-height: 0; flex-direction: column; justify-content: flex-start; padding: 0; }
+.idle-message { color: #d2dbe7; font-size: 36px; }
+.idle-screen > .idle-message { display: flex; flex: 1 1 auto; align-self: stretch; align-items: center; justify-content: center; }
+.idle-media-layer { position: relative; display: flex; flex: 1 1 auto; align-items: center; justify-content: center; width: 100%; min-height: 0; overflow: hidden; }
+.idle-media { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+.idle-media-layer video { width: 100%; height: 100%; }
+.idle-ticker { display: block; flex: 0 0 3rem; width: 100%; overflow: hidden; color: #fff; font-size: clamp(18px, 2vw, 30px); line-height: 3rem; white-space: nowrap; }
+.idle-ticker[hidden] { display: none; }
+.idle-ticker-content { display: inline-block; width: max-content; animation: idle-ticker-scroll 24s linear infinite; }
+.idle-ticker[data-speed="slow"] .idle-ticker-content { animation-duration: 36s; }
+.idle-ticker[data-speed="fast"] .idle-ticker-content { animation-duration: 14s; }
+.idle-sound-toggle { position: absolute; right: 1rem; bottom: 1rem; z-index: 1; padding: 0.45rem 0.8rem; border: 1px solid #aaa; border-radius: 0.4rem; background: #111d; color: #fff; font: inherit; cursor: pointer; }
+@keyframes idle-ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+@media (orientation: portrait) {
+  .display-header { max-height: 42%; }
+  .alarm-row-time { font-size: 0.62em; }
+}
+
+@media (max-width: 800px) {
+  .display-header { padding: 0.4rem 0.6rem; }
+  .alarm-row { font-size: 24px; }
+  .connection-status { font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+  .alarm-row { font-size: 20px; }
+  .alarm-row-time { font-size: 10px; }
+}
+
+.alarm-message { display: flex; align-items: center; justify-content: center; gap: 18px; width: 100%; }
+.alarm-exit-icon { flex: 0 0 auto; width: 76px; height: 76px; object-fit: contain; }
+.alarm-exit-icon[hidden] { display: none !important; }
+@media (max-width: 480px) { .alarm-message { gap: 10px; } .alarm-exit-icon { width: 48px; height: 48px; } }
+
+.idle-message[hidden] { display: none !important; }
+
+.display-screen.is-idle .display-header { position: absolute; top: 0; right: 0; left: 0; z-index: 2; pointer-events: none; }
+
+.idle-ticker[data-position='top'] { order: -1; }

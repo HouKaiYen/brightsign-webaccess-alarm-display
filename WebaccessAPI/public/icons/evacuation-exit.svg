@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="EXIT 避難出口">
+  <rect x="2" y="2" width="96" height="96" rx="6" fill="#e51c23" stroke="#ffb4b4" stroke-width="2"/>
+  <circle cx="59" cy="14" r="7" fill="#fff"/>
+  <path d="M53 29 45 48 58 58 65 74M45 48 36 69H25M52 29 36 32 31 43M52 29 65 35 70 48" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="50" y="93" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#fff">EXIT</text>
+</svg>

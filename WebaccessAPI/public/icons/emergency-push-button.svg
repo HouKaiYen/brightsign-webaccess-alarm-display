@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="緊急押鈕">
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1"><stop stop-color="#a1a8af"/><stop offset="0.22" stop-color="#f8f9fa"/><stop offset="0.8" stop-color="#e0e4e7"/><stop offset="1" stop-color="#9ba3ab"/></linearGradient>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="5" fill="#e51c23" stroke="#9e141a" stroke-width="2"/>
+  <rect x="22" y="2" width="56" height="96" rx="2" fill="url(#panel)" stroke="#8b939b" stroke-width="2"/>
+  <rect x="32" y="23" width="36" height="56" rx="2" fill="#aab1b8" stroke="#fff" stroke-width="2"/>
+  <rect x="36" y="27" width="28" height="48" rx="1" fill="#ed2029" stroke="#a8121a" stroke-width="2"/>
+  <path d="M38 29h24" stroke="#ff8990" stroke-width="2"/>
+  <path d="M39 43h8M43 37v26q0 3-4 2M38 56l9-6M50 39h11v16H50ZM50 47h11M55.5 39v28" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
