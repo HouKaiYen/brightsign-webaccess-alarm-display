@@ -1,3 +1,4 @@
+import { DefaultIdleSettings, type VersionedIdleSettings } from '../shared/contracts.js';
 import assert from 'node:assert/strict';
 import { createServer, type Server as HttpServer } from 'node:http';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -138,3 +139,25 @@ function createTwoPagePdf(): Buffer {
   content += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${crossReferenceOffset}\n%%EOF`;
   return Buffer.from(content, 'ascii');
 }
+
+test('跑馬燈數值設定可重啟讀回、拒絕非法數值並相容舊版速度', async (): Promise<void> => {
+  const dataDirectory: string = await mkdtemp(path.join(os.tmpdir(), 'marquee-settings-'));
+  const store: SettingsStore = new SettingsStore(dataDirectory);
+  try {
+    await store.initialize();
+    const saved: VersionedIdleSettings = await store.saveIdleSettings({ ...DefaultIdleSettings, version: 1, marquee: { isEnabled: true, text: '公告', speed: 'normal', fontSizePx: 72, speedPixelsPerSecond: 125 } });
+    const restarted: SettingsStore = new SettingsStore(dataDirectory);
+    await restarted.initialize();
+    assert.deepEqual(await restarted.getIdleSettings(), saved);
+    for (const patch of [{ fontSizePx: 11 }, { fontSizePx: 121 }, { fontSizePx: 24.5 }, { fontSizePx: null }, { speedPixelsPerSecond: 9 }, { speedPixelsPerSecond: 501 }, { speedPixelsPerSecond: 80.5 }, { speedPixelsPerSecond: '80' }]) {
+      await assert.rejects(restarted.saveIdleSettings({ ...saved, marquee: { ...saved.marquee, ...patch } }), /設定格式無效/);
+    }
+    assert.deepEqual(await restarted.getIdleSettings(), saved);
+    const legacy: VersionedIdleSettings = await restarted.saveIdleSettings({ ...saved, marquee: { isEnabled: true, text: '舊版', speed: 'fast' } });
+    assert.equal(legacy.marquee.speedPixelsPerSecond, undefined);
+    await restarted.initialize();
+    assert.equal((await restarted.getIdleSettings()).marquee.speed, 'fast');
+  } finally {
+    await rm(dataDirectory, { recursive: true, force: true });
+  }
+});

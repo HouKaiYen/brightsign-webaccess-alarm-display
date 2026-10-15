@@ -280,6 +280,8 @@ export class SettingsStore {
     if (!this.isRecord(settings) || !Array.isArray(settings.items) || settings.items.length > 200 || typeof settings.isMuted !== 'boolean' ||
       !this.isRecord(settings.marquee) || typeof settings.marquee.isEnabled !== 'boolean' ||
       typeof settings.marquee.text !== 'string' || settings.marquee.text.length > 500 || !MarqueeSpeedOptions.some((option) => option.value === settings.marquee.speed) ||
+      (settings.marquee.fontSizePx !== undefined && (!Number.isInteger(settings.marquee.fontSizePx) || settings.marquee.fontSizePx < 12 || settings.marquee.fontSizePx > 120)) ||
+      (settings.marquee.speedPixelsPerSecond !== undefined && (!Number.isInteger(settings.marquee.speedPixelsPerSecond) || settings.marquee.speedPixelsPerSecond < 10 || settings.marquee.speedPixelsPerSecond > 500)) ||
       (settings.marquee.position !== undefined && !['top', 'bottom'].includes(settings.marquee.position))) {
       throw new SettingsValidationError('待機媒體、聲音或跑馬燈設定格式無效。');
     }

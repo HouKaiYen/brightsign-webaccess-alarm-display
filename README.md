@@ -6,7 +6,7 @@ Windows 免安裝的 WebAccess 警報平面圖與 BrightSign 顯示系統。
 
 前往右側 **Releases**，或開啟 [最新版本下載](https://github.com/LMonkey1025/brightsign-webaccess-alarm-display/releases/latest)。
 
-1. 在 Assets 下載 **BrightSignAlarm-v0.1.0-win-x64.zip**。GitHub 自動提供的 Source code 是原始碼，不是免安裝程式。
+1. 在 Assets 下載 **BrightSignAlarm-v0.2.0-win-x64.zip**。GitHub 自動提供的 Source code 是原始碼，不是免安裝程式。
 2. 將 ZIP 完整解壓縮到固定資料夾，例如 `C:\BrightSignAlarm`（不要直接在 ZIP 內啟動）。
 3. 雙擊「開啟設定頁.cmd」。套件內含 Node.js，不需另外安裝 Node.js 或 npm。
 4. 進入「工程設定」設定 WebAccess 連線、平面圖及測點。
@@ -36,3 +36,11 @@ Windows x64；服務與管理頁供可信任內網使用。WebAccess 連線設�
 更新前先停止程式並備份 data，更新時保留 data 與 portable.config.json。
 
 完整操作與開發說明請參閱 [WebaccessAPI/README.md](WebaccessAPI/README.md)。
+
+## v0.2.0 更新內容
+
+- 跑馬燈字體可輸入 12–120 像素，速度可輸入 10–500 像素／秒，短公告自動補滿畫面並無縫循環。
+- 管理頁與待機預覽採相同計算方式，僅有跑馬燈也能預覽；舊版速度設定仍可讀取。
+- 單張圖片持續顯示，影片播完切換下一項，單支影片自動重播。
+- 影片連續 30 秒沒有播放進度時跳過並稍後重試，避免卡住輪播。
+- 39 項測試與正式建置通過；BrightSign 實機與案場 WebAccess 相容性仍須確認。

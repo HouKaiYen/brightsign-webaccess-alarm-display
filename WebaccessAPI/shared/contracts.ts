@@ -60,6 +60,8 @@ export interface IdleMarquee {
   text: string;
   speed: MarqueeSpeed;
   position?: 'top' | 'bottom';
+  fontSizePx?: number;
+  speedPixelsPerSecond?: number;
 }
 
 export interface IdleSettings {
@@ -75,7 +77,7 @@ export interface VersionedIdleSettings extends IdleSettings {
 export const DefaultIdleSettings: IdleSettings = {
   items: [],
   isMuted: true,
-  marquee: { isEnabled: false, text: '', speed: 'normal', position: 'bottom' },
+  marquee: { isEnabled: false, text: '', speed: 'normal', position: 'bottom', fontSizePx: 30, speedPixelsPerSecond: 80 },
 };
 
 export interface ActiveAlarm {

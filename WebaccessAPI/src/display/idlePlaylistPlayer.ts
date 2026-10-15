@@ -1,4 +1,4 @@
-import { MarqueeSpeedOptions } from '../../shared/contracts';
+import { MarqueeRenderer } from './marquee';
 import type { IdleMedia, IdleSettings } from '../../shared/contracts';
 
 interface PlaylistFrame {
@@ -12,6 +12,7 @@ export class IdlePlaylistPlayer {
   private readonly _ticker: HTMLDivElement;
   private readonly _tickerContent: HTMLSpanElement;
   private readonly _message: HTMLDivElement;
+  private readonly _marqueeRenderer: MarqueeRenderer;
   private _settingsSignature: string = '';
   private _legacyImageUrl: string = '';
   private _frames: PlaylistFrame[] = [];
@@ -34,6 +35,7 @@ export class IdlePlaylistPlayer {
     this._tickerContent = document.createElement('span');
     this._tickerContent.className = 'idle-ticker-content';
     this._ticker.append(this._tickerContent);
+    this._marqueeRenderer = new MarqueeRenderer(this._ticker, this._tickerContent);
     this._message = document.createElement('div');
     this._message.className = 'idle-message';
     this._host.append(this._mediaLayer, this._ticker, this._message);
@@ -60,20 +62,7 @@ export class IdlePlaylistPlayer {
       this.clearMedia();
       this.renderFrame();
     }
-    const marqueeText: string = settings?.marquee.isEnabled === true ? settings.marquee.text.trim() : '';
-    this._ticker.hidden = marqueeText.length === 0;
-    if (marqueeText.length > 0) {
-      const tickerContent: string = `${marqueeText}\u00a0\u00a0\u00a0\u00a0${marqueeText}\u00a0\u00a0\u00a0\u00a0`;
-      if (this._tickerContent.textContent !== tickerContent) {
-        this._tickerContent.textContent = tickerContent;
-      }
-      this._ticker.dataset.position = settings?.marquee.position ?? 'bottom';
-      const speed: string = settings?.marquee.speed ?? 'normal';
-      this._tickerContent.style.animationDuration = String(MarqueeSpeedOptions.find((option) => option.value === speed)?.seconds ?? 24) + 's';
-      if (this._ticker.dataset.speed !== speed) {
-        this._ticker.dataset.speed = speed;
-      }
-    }
+    this._marqueeRenderer.update(settings?.marquee);
     this._message.hidden = this._frames.length > 0 && this._failedFrameKeys.size < this._frames.length;
     if (this._frames.length === 0 && this._message.textContent !== message) {
       this._message.textContent = message;
@@ -99,6 +88,7 @@ export class IdlePlaylistPlayer {
 
   public dispose(): void {
     this._isDisposed = true;
+    this._marqueeRenderer.dispose();
     this.clearRetryTimer();
     this.clearTimer();
     this.clearMedia();
@@ -174,6 +164,24 @@ export class IdlePlaylistPlayer {
       soundButton.addEventListener('click', this.handleSoundToggle, { once: false });
       this._mediaLayer.append(video, soundButton);
       this.updateSoundButton(video.muted);
+      let lastPlaybackTime: number = video.currentTime;
+      const resetProgressTimeout: () => void = (): void => {
+        this.clearTimer();
+        this._timer = window.setTimeout((): void => {
+          if (mediaGeneration === this._mediaGeneration && this._isVisible && video.isConnected) {
+            this.failCurrentFrame();
+          }
+        }, 30000);
+      };
+      // 只讓實際播放進度延長期限，避免重複緩衝事件掩蓋停滯。
+      video.addEventListener('timeupdate', (): void => {
+        if (mediaGeneration !== this._mediaGeneration || !this._isVisible || !video.isConnected) return;
+        if (Number.isFinite(video.currentTime) && video.currentTime > lastPlaybackTime) {
+          lastPlaybackTime = video.currentTime;
+          resetProgressTimeout();
+        }
+      });
+      resetProgressTimeout();
       const playResult: Promise<void> = video.play();
       void playResult.catch((): void => {
         if (mediaGeneration !== this._mediaGeneration || !this._isVisible || !video.isConnected) {
@@ -202,7 +210,9 @@ export class IdlePlaylistPlayer {
     image.src = frame.url;
     this._mediaLayer.append(image);
     const durationSeconds: number = Math.min(300, Math.max(3, frame.item.durationSeconds || 10));
-    this._timer = window.setTimeout(this.advanceFrame, durationSeconds * 1000);
+    if (this._frames.length > 1) {
+      this._timer = window.setTimeout(this.advanceFrame, durationSeconds * 1000);
+    }
   }
 
   private readonly advanceFrame = (): void => {
