@@ -4,6 +4,7 @@ $projectDirectory = Split-Path -Parent $PSScriptRoot
 $outputDirectory = Join-Path $projectDirectory 'artifacts'
 $version = (& $RuntimePath --version).Trim()
 if ($version -notmatch '^v24\.[0-9]+\.[0-9]+$') { throw '請使用 Node.js 24 x64 官方執行檔打包。' }
+if ([version]$version.Substring(1) -lt [version]'24.22.1') { throw 'Node.js 安全版本不足：請先更新至 24.22.1 或更新的 24.x，再重新打包。' }
 if ((& $RuntimePath -p 'process.arch').Trim() -ne 'x64') { throw '只支援 Windows x64 執行環境。' }
 $manifest = (Invoke-WebRequest "https://nodejs.org/dist/$version/SHASUMS256.txt" -UseBasicParsing).Content
 $manifestMatch = [regex]::Match($manifest, '(?m)^([0-9a-f]{64})\s+win-x64/node\.exe\s*$')
