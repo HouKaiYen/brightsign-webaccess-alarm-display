@@ -53,7 +53,7 @@ WebAccess 密碼以 Windows DPAPI 本機範圍加密並限制連線設定檔的�
 
 ## 原始碼安裝與啟動
 
-使用 Node.js 22.12 以上的 22 LTS，或 Node.js 24 LTS。在此資料夾執行：
+使用 Node.js 24.22.1 以上的 24 LTS（建議），或 22.23.4 以上的 22 LTS。這是 2026-10-21 官方安全更新的最低版本；`.nvmrc` 指定 24.22.1，免安裝包只接受 24.22.1 以上的 24.x 官方 x64 執行檔。在此資料夾執行：
 
 ```powershell
 npm ci
@@ -99,6 +99,14 @@ Name 精確匹配，出現在有效完整警報清單即觸發，消失即解除
 每頁最多一個測點，新增另一個測點請建立另一個頁面。尚未綁定 Name 的頁面不參與警報切換。先前的多測點共用頁面設定會於啟動時拆分成獨立頁面，各測點的底圖、圖示、座標及文字皆保留。
 
 ## 開發與驗證
+
+### Node.js 安全更新
+
+- 官方公告：https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
+- 更新開發主機的 Node.js 後，重新開啟終端機，以 `node --version` 確認為 24.22.1 或更新的 24.x。
+- 在可連線 npm 官方站的環境執行 `npm ci`、`npm outdated` 與 `npm audit`；依漏洞修補需求更新套件及 lockfile，再執行下列測試與建置。掃描連線失敗不代表沒有漏洞。
+- 重新執行 `npm run package:portable` 產生新包；更新主機上的 Node.js 不會更新舊免安裝包內的 `runtime/node.exe`。
+- 案場更新前先備份並停止程式，依上方免安裝包更新方式替換 `app`、`runtime`、`tools`，保留案場資料。舊 ZIP 也仍包含舊執行環境，不應當作已修補版本部署。
 
 ```powershell
 # 兩個終端機分別執行：
