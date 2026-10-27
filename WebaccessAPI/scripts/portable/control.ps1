@@ -1,6 +1,7 @@
 ﻿param(
-    [ValidateSet('Start', 'Stop', 'Settings', 'EnableStartup', 'DisableStartup', 'RepairPermissions')]
-    [string]$Action = 'Start'
+    [ValidateSet('Start', 'Stop', 'Settings', 'EnableStartup', 'DisableStartup', 'RepairPermissions', 'Tray')]
+    [string]$Action = 'Start',
+    [switch]$NoTray
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,11 +56,20 @@ function Start-PortableApplication {
     Write-Output "警報系統已啟動。設定：http://localhost:$port/settings；播放器：http://主機IP:$port/display"
 }
 
+function Start-TrayIfInteractive {
+    if ($NoTray -or !(Get-Process -Id $PID).SessionId -or ![Environment]::UserInteractive) { return }
+    $trayScript = Join-Path $PSScriptRoot 'tray.ps1'
+    if (Test-Path -LiteralPath $trayScript) {
+        Start-Process -FilePath "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', "`"$trayScript`"") -WindowStyle Hidden
+    }
+}
+
 try {
 switch ($Action) {
+    'Tray' { Start-TrayIfInteractive }
     'RepairPermissions' { & (Join-Path $PSScriptRoot 'repair-connection-permissions.ps1') }
-    'Start' { Start-PortableApplication }
-    'Settings' { Start-PortableApplication; Start-Process "http://localhost:$port/settings" }
+    'Start' { Start-PortableApplication; Start-TrayIfInteractive }
+    'Settings' { Start-PortableApplication; Start-TrayIfInteractive; Start-Process "http://localhost:$port/settings" }
     'Stop' {
         $startupTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
         if ($null -ne $startupTask -and $startupTask.State -eq 'Running') { Stop-ScheduledTask -TaskName $taskName }
