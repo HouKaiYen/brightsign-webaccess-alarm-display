@@ -1,6 +1,7 @@
 ﻿param(
-    [ValidateSet('Start', 'Stop', 'Settings', 'EnableStartup', 'DisableStartup', 'RepairPermissions')]
-    [string]$Action = 'Start'
+    [ValidateSet('Start', 'Stop', 'Settings', 'EnableStartup', 'DisableStartup', 'RepairPermissions', 'Tray')]
+    [string]$Action = 'Start',
+    [switch]$NoTray
 )
 
 $ErrorActionPreference = 'Stop'
@@ -19,6 +20,7 @@ $shaAlgorithm = [Security.Cryptography.SHA256]::Create()
 try { $pathHash = ([BitConverter]::ToString($shaAlgorithm.ComputeHash($pathBytes))).Replace('-', '').Substring(0, 12) }
 finally { $shaAlgorithm.Dispose() }
 $taskName = "BrightSignAlarm-$pathHash"
+$trayTaskName = "BrightSignAlarmTray-$pathHash"
 
 function Get-PortableProcess {
     if (!(Test-Path -LiteralPath $processRecordPath)) { return $null }
@@ -55,11 +57,20 @@ function Start-PortableApplication {
     Write-Output "警報系統已啟動。設定：http://localhost:$port/settings；播放器：http://主機IP:$port/display"
 }
 
+function Start-TrayIfInteractive {
+    if ($NoTray -or !(Get-Process -Id $PID).SessionId -or ![Environment]::UserInteractive) { return }
+    $trayScript = Join-Path $PSScriptRoot 'tray.ps1'
+    if (Test-Path -LiteralPath $trayScript) {
+        Start-Process -FilePath "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', "`"$trayScript`"") -WindowStyle Hidden
+    }
+}
+
 try {
 switch ($Action) {
+    'Tray' { Start-TrayIfInteractive }
     'RepairPermissions' { & (Join-Path $PSScriptRoot 'repair-connection-permissions.ps1') }
-    'Start' { Start-PortableApplication }
-    'Settings' { Start-PortableApplication; Start-Process "http://localhost:$port/settings" }
+    'Start' { Start-PortableApplication; Start-TrayIfInteractive }
+    'Settings' { Start-PortableApplication; Start-TrayIfInteractive; Start-Process "http://localhost:$port/settings" }
     'Stop' {
         $startupTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
         if ($null -ne $startupTask -and $startupTask.State -eq 'Running') { Stop-ScheduledTask -TaskName $taskName }
@@ -77,12 +88,23 @@ switch ($Action) {
         $taskTrigger = New-ScheduledTaskTrigger -AtStartup
         $taskSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
         Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -User 'SYSTEM' -RunLevel Highest -Description 'BrightSign WebAccess 可攜式警報系統' -Force | Out-Null
-        Write-Output '已啟用 Windows 開機自啟動，下次開機將自動執行。'
+        # The service runs as SYSTEM at boot; the tray must run in each user's interactive session.
+        $trayScript = Join-Path $PSScriptRoot 'tray.ps1'
+        $trayAction = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$trayScript`"" -WorkingDirectory $packageDirectory
+        $trayTrigger = New-ScheduledTaskTrigger -AtLogOn
+        $trayPrincipal = New-ScheduledTaskPrincipal -GroupId 'S-1-5-32-545' -RunLevel Limited
+        $traySettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances Parallel -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+        Register-ScheduledTask -TaskName $trayTaskName -Action $trayAction -Trigger $trayTrigger -Principal $trayPrincipal -Settings $traySettings -Description 'BrightSign WebAccess 登入後顯示系統匣' -Force | Out-Null
+        Write-Output '已啟用 Windows 開機自啟動，登入後會顯示系統匣。'
     }
     'DisableStartup' {
         $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
         if ($null -ne $task) {
             Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+        }
+        $trayTask = Get-ScheduledTask -TaskName $trayTaskName -ErrorAction SilentlyContinue
+        if ($null -ne $trayTask) {
+            Unregister-ScheduledTask -TaskName $trayTaskName -Confirm:$false
         }
         Write-Output '已取消此資料夾的開機自啟動。'
     }

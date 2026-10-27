@@ -30,10 +30,17 @@ try {
     finally { Pop-Location }
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'portable') -Destination (Join-Path $stagingDirectory 'tools') -Recurse
     [IO.File]::WriteAllText((Join-Path $stagingDirectory 'portable.config.json'), "{`r`n  `"port`": 3006`r`n}`r`n", [Text.UTF8Encoding]::new($false))
-    $launchers = [ordered]@{ '啟動警報系統.cmd'='Start'; '停止警報系統.cmd'='Stop'; '開啟設定頁.cmd'='Settings'; '啟用開機自啟動.cmd'='EnableStartup'; '取消開機自啟動.cmd'='DisableStartup'; '修復連線設定權限.cmd'='RepairPermissions' }
+    $launchers = [ordered]@{ '啟動警報系統.cmd'='Start'; '開啟設定頁.cmd'='Settings' }
     foreach ($launcher in $launchers.GetEnumerator()) {
         $text = "@echo off`r`npowershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0tools\control.ps1`" -Action $($launcher.Value)`r`nif errorlevel 1 pause`r`n"
         [IO.File]::WriteAllText((Join-Path $stagingDirectory $launcher.Key), $text, [Text.Encoding]::ASCII)
+    }
+    $maintenanceDirectory = Join-Path $stagingDirectory '進階管理工具'
+    New-Item -ItemType Directory -Path $maintenanceDirectory -Force | Out-Null
+    $maintenanceLaunchers = [ordered]@{ '停止警報系統.cmd'='Stop'; '啟用開機自啟動.cmd'='EnableStartup'; '取消開機自啟動.cmd'='DisableStartup'; '修復連線設定權限.cmd'='RepairPermissions'; '開啟系統匣圖示.cmd'='Tray' }
+    foreach ($launcher in $maintenanceLaunchers.GetEnumerator()) {
+        $text = "@echo off`r`npowershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0..\tools\control.ps1`" -Action $($launcher.Value)`r`nif errorlevel 1 pause`r`n"
+        [IO.File]::WriteAllText((Join-Path $maintenanceDirectory $launcher.Key), $text, [Text.Encoding]::ASCII)
     }
     Copy-Item -LiteralPath (Join-Path $projectDirectory 'README.md') -Destination (Join-Path $stagingDirectory '使用說明.md')
     $zipPath = "$stagingDirectory.zip"
