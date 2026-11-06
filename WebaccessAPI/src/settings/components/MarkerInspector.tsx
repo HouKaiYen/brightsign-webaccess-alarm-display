@@ -30,6 +30,7 @@ export function MarkerInspector({ hasPages, currentPage, marker, tags, tagsLoade
   const [iconError, setIconError] = useState('');
 
   const markerDescription: string = tags.find((tag: TagOption) => tag.name === marker?.name)?.description.trim() ?? '';
+  const shouldHideMarkerSettings: boolean = marker?.shouldShowExitIcon === true || marker?.shouldShowOnlyImage === true;
 
   const filteredTags: TagOption[] = tags.filter((tag: TagOption) => `${tag.name} ${tag.description}`.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())).slice(0, 30);
 
@@ -103,7 +104,7 @@ export function MarkerInspector({ hasPages, currentPage, marker, tags, tagsLoade
           <p className="field-hint">文字不會覆蓋在平面圖或圖示上。</p>
           <label className="toggle-row"><span><strong>避難訊息旁顯示 EXIT 圖示</strong><small>保留平面圖，隱藏圖面警報圖示；取消後恢復</small></span><input type="checkbox" checked={marker.shouldShowExitIcon === true} onChange={(event) => onChange({ shouldShowExitIcon: event.currentTarget.checked })} /><span className="toggle-control" /></label>
           <label className="toggle-row"><span><strong>警報時整頁只顯示圖片</strong><small>只顯示此測點頁面的圖片，不顯示文字、狀態或圖示</small></span><input type="checkbox" checked={marker.shouldShowOnlyImage === true} onChange={(event) => onChange({ shouldShowOnlyImage: event.currentTarget.checked })} /><span className="toggle-control" /></label>
-          <div className="field-row coordinates-row">
+          {!shouldHideMarkerSettings && <><div className="field-row coordinates-row">
             <div><label className="field-label" htmlFor="marker-x">水平位置</label><div className="input-suffix"><input id="marker-x" type="number" min="0" max="100" step="0.1" value={marker.x} onChange={(event) => onChange({ x: clampNumber(event.currentTarget.value, 0, 100) })} /><span>%</span></div></div>
             <div><label className="field-label" htmlFor="marker-y">垂直位置</label><div className="input-suffix"><input id="marker-y" type="number" min="0" max="100" step="0.1" value={marker.y} onChange={(event) => onChange({ y: clampNumber(event.currentTarget.value, 0, 100) })} /><span>%</span></div></div>
           </div>
@@ -122,6 +123,7 @@ export function MarkerInspector({ hasPages, currentPage, marker, tags, tagsLoade
             <div><label className="field-label" htmlFor="marker-size">大小</label><div className="input-suffix"><input id="marker-size" type="number" min="20" max="160" value={marker.size} onChange={(event) => onChange({ size: clampNumber(event.currentTarget.value, 20, 160) })} /><span>px</span></div></div>
           </div>
           <label className="toggle-row"><span><strong>警報時閃爍</strong><small>模擬預覽與正式顯示皆套用</small></span><input type="checkbox" checked={marker.shouldBlink} onChange={(event) => onChange({ shouldBlink: event.currentTarget.checked })} /><span className="toggle-control" /></label>
+          </>}
         </>
       )}
     </aside>
