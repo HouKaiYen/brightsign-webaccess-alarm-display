@@ -117,7 +117,7 @@ export function PlanCanvas({ page, marker, previewEnabled, onMoveMarker }: PlanC
           className="marker-layer"
           style={{ left: imageBounds.left, top: imageBounds.top, width: imageBounds.width, height: imageBounds.height } as CSSProperties}
         >
-          {marker !== null && marker.pageId === page.id && (!previewEnabled || marker.shouldShowExitIcon !== true) && (
+          {marker !== null && marker.pageId === page.id && (!previewEnabled || (marker.shouldShowExitIcon !== true && marker.shouldShowOnlyImage !== true)) && (
               <button
                 key={marker.id}
                 className="plan-marker is-selected"
@@ -131,7 +131,7 @@ export function PlanCanvas({ page, marker, previewEnabled, onMoveMarker }: PlanC
                 <AlarmIcon iconKind={marker.iconKind} iconUrl={marker.iconUrl} color={marker.color} size={marker.size} shouldBlink={previewEnabled && marker.shouldBlink} />
               </button>
           )}
-          {previewEnabled && <span className="preview-badge">模擬預覽</span>}
+          {previewEnabled && marker?.shouldShowOnlyImage !== true && <span className="preview-badge">模擬預覽</span>}
         </div>
       )}
     </div>

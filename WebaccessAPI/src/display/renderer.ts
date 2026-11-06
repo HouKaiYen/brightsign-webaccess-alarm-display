@@ -11,7 +11,6 @@ interface AlarmElements {
   element: HTMLDivElement;
   text: HTMLSpanElement;
   exitIcon: HTMLImageElement;
-  time: HTMLTimeElement;
 }
 
 const namespace: 'http://www.w3.org/2000/svg' = 'http://www.w3.org/2000/svg';
@@ -149,6 +148,7 @@ function updateMarker(elements: MarkerElements, marker: AlarmMarker): void {
 
 export class DisplayRenderer {
   private readonly _root: HTMLElement;
+  private readonly _header: HTMLElement;
   private readonly _status: HTMLDivElement;
   private readonly _alarms: HTMLDivElement;
   private readonly _planViewport: HTMLDivElement;
@@ -167,14 +167,14 @@ export class DisplayRenderer {
   public constructor(root: HTMLElement) {
     this._root = root;
     root.className = 'display-screen';
-    const header: HTMLElement = document.createElement('header');
-    header.className = 'display-header';
+    this._header = document.createElement('header');
+    this._header.className = 'display-header';
     this._status = document.createElement('div');
     this._status.className = 'connection-status';
     this._status.setAttribute('role', 'status');
     this._alarms = document.createElement('div');
     this._alarms.className = 'alarm-list';
-    header.append(this._status, this._alarms);
+    this._header.append(this._status, this._alarms);
 
     this._planViewport = document.createElement('main') as HTMLDivElement;
     this._planViewport.className = 'plan-viewport';
@@ -195,7 +195,7 @@ export class DisplayRenderer {
     this._idlePlayer = new IdlePlaylistPlayer(this._idle);
     this._resizeHandler = (): void => this.resizePlanImage();
     window.addEventListener('resize', this._resizeHandler);
-    replaceChildrenCompat(this._root, header, this._planViewport, this._idle);
+    replaceChildrenCompat(this._root, this._header, this._planViewport, this._idle);
     this.render();
   }
 
@@ -217,10 +217,13 @@ export class DisplayRenderer {
 
   private render(): void {
     const view: DisplayViewModel = getDisplayViewModel(this._state);
+    const shouldShowOnlyImage: boolean = view.alarms.length > 0 && view.markers[0]?.shouldShowOnlyImage === true;
     this._root.classList.toggle('is-idle', view.page === null);
+    this._root.classList.toggle('is-image-only', shouldShowOnlyImage);
+    this._header.hidden = shouldShowOnlyImage;
     this.renderStatus(view.statusText);
-    this.renderAlarms(view.alarms, view.markers);
-    this._planViewport.classList.toggle('has-alarm', view.alarms.length > 0);
+    this.renderAlarms(shouldShowOnlyImage ? [] : view.alarms, view.markers);
+    this._planViewport.classList.toggle('has-alarm', view.alarms.length > 0 && !shouldShowOnlyImage);
     if (view.page === null) {
       this._idlePlayer.setVisible(true);
       this._idlePlayer.update(this._state?.settings.idle, this._state?.settings.idleImageUrl ?? '', this.getIdleMessage());
@@ -232,7 +235,7 @@ export class DisplayRenderer {
     this._idlePlayer.setVisible(false);
     this._planViewport.hidden = false;
     this.renderPlanImage(view.page.imageUrl);
-    this.renderMarkers(view.markers, view.alarms);
+    this.renderMarkers(shouldShowOnlyImage ? [] : view.markers, view.alarms);
     this.resizePlanImage();
   }
 
@@ -284,20 +287,18 @@ export class DisplayRenderer {
         exitIcon.hidden = true;
         message.append(text, exitIcon);
         element.append(message, time);
-        row = { element, text, exitIcon, time };
+        row = { element, text, exitIcon };
         this._alarmElements.set(id, row);
       }
       row.exitIcon.hidden = marker.shouldShowExitIcon !== true;
-      row.text.hidden = marker.shouldShowOnlyExitIcon === true;
-      row.time.hidden = marker.shouldShowOnlyExitIcon === true;
-      row.element.classList.toggle('is-image-only', marker.shouldShowOnlyExitIcon === true);
       const text: string = getAlarmText(marker, alarm);
       if (row.text.textContent !== text) {
         row.text.textContent = text;
       }
+      const timeElement: HTMLTimeElement = row.element.querySelector('time') as HTMLTimeElement;
       const timeText: string = alarm.time.length > 0 ? alarm.time : '';
-      if (row.time.textContent !== timeText) {
-        row.time.textContent = timeText;
+      if (timeElement.textContent !== timeText) {
+        timeElement.textContent = timeText;
       }
       desiredRows.push(row.element);
     }
