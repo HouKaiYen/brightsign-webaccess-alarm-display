@@ -25,7 +25,7 @@ test('共用平面圖庫可獨立儲存，兩個測點頁面可引用相同底�
     const sharedSettings: AlarmSettings = await store.saveSettings({
       ...librarySettings,
       pages: [{ id: 'a', name: '測點 A', imageUrl: '/uploads/shared.png' }, { id: 'b', name: '測點 B', imageUrl: '/uploads/shared.png' }],
-      markers: ['a', 'b'].map((pageId: string) => ({ id: pageId, pageId, name: `Alarm-${pageId}`, text: pageId, x: 50, y: 50, size: 48, color: '#ff0000', shouldBlink: true, iconKind: pageId === 'a' ? 'push-button' : 'sos', shouldShowExitIcon: pageId === 'a', iconUrl: '' })),
+      markers: ['a', 'b'].map((pageId: string) => ({ id: pageId, pageId, name: `Alarm-${pageId}`, text: pageId, x: 50, y: 50, size: 48, color: '#ff0000', shouldBlink: true, iconKind: pageId === 'a' ? 'push-button' : 'sos', shouldShowExitIcon: pageId === 'a', shouldShowOnlyExitIcon: pageId === 'a', iconUrl: '' })),
     });
     const reloadedSettings: AlarmSettings = await store.getSettings();
     assert.deepEqual(reloadedSettings, sharedSettings);
@@ -34,7 +34,10 @@ test('共用平面圖庫可獨立儲存，兩個測點頁面可引用相同底�
     await restartedStore.initialize();
     assert.equal((await restartedStore.getSettings()).markers[0].iconKind, 'push-button');
     assert.equal((await restartedStore.getSettings()).markers[0].shouldShowExitIcon, true);
+    assert.equal((await restartedStore.getSettings()).markers[0].shouldShowOnlyExitIcon, true);
     await assert.rejects(store.saveSettings({ ...sharedSettings, markers: sharedSettings.markers.map((marker) => ({ ...marker, shouldShowExitIcon: 'true' })) }), /警報標記/);
+    await assert.rejects(store.saveSettings({ ...sharedSettings, markers: sharedSettings.markers.map((marker) => ({ ...marker, shouldShowOnlyExitIcon: 'true' })) }), /警報標記/);
+    await assert.rejects(store.saveSettings({ ...sharedSettings, markers: sharedSettings.markers.map((marker) => ({ ...marker, shouldShowExitIcon: false, shouldShowOnlyExitIcon: true })) }), /必須啟用 EXIT 圖示/);
     await assert.rejects(store.saveSettings({ ...sharedSettings, floorPlanImages: [{ id: 'missing', name: '不存在', imageUrl: '/uploads/missing.png' }] }), /圖片不存在/);
     assert.deepEqual(await store.getSettings(), sharedSettings);
   } finally {

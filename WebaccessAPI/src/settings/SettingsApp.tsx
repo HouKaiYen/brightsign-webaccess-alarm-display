@@ -394,9 +394,9 @@ function SettingsApp(): JSX.Element {
           {pageMarkers.length > 1 && <div className="notice-bar error-notice" role="alert">此測點頁面目前綁定多個 Name。每個頁面只能有一個測點，請在右側逐一解除多餘的 Name。</div>}
           {isPreviewEnabled && selectedMarker !== null && (
             <section className="preview-alarm-text" aria-label="模擬警報文字" aria-live="polite">
-              <div className="preview-alarm-heading"><span className="preview-alarm-indicator" /><strong>模擬警報</strong><span>平面圖上方顯示警報文字</span></div>
+              <div className="preview-alarm-heading"><span className="preview-alarm-indicator" /><strong>模擬警報</strong><span>{selectedMarker.shouldShowOnlyExitIcon === true ? '平面圖上方只顯示 EXIT 圖片' : '平面圖上方顯示警報文字'}</span></div>
               <div className="preview-alarm-list">
-                {selectedMarker && <div className="preview-alarm-item"><span className="preview-alarm-point" /><span>{getPreviewAlarmText(selectedMarker, tags)}</span>{selectedMarker.shouldShowExitIcon && <img className="preview-exit-icon" src="/icons/evacuation-exit.svg" alt="EXIT 避難出口" />}</div>}
+                {selectedMarker && <div className={`preview-alarm-item${selectedMarker.shouldShowOnlyExitIcon === true ? ' is-image-only' : ''}`}><span className="preview-alarm-point" />{selectedMarker.shouldShowOnlyExitIcon !== true && <span>{getPreviewAlarmText(selectedMarker, tags)}</span>}{selectedMarker.shouldShowExitIcon && <img className="preview-exit-icon" src="/icons/evacuation-exit.svg" alt="EXIT 避難出口" />}</div>}
               </div>
             </section>
           )}
