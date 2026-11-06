@@ -392,7 +392,7 @@ function SettingsApp(): JSX.Element {
           )}
           {pageImageError && <div className="notice-bar error-notice">{pageImageError}</div>}
           {pageMarkers.length > 1 && <div className="notice-bar error-notice" role="alert">此測點頁面目前綁定多個 Name。每個頁面只能有一個測點，請在右側逐一解除多餘的 Name。</div>}
-          {isPreviewEnabled && selectedMarker !== null && (
+          {isPreviewEnabled && selectedMarker !== null && selectedMarker.shouldShowOnlyImage !== true && (
             <section className="preview-alarm-text" aria-label="模擬警報文字" aria-live="polite">
               <div className="preview-alarm-heading"><span className="preview-alarm-indicator" /><strong>模擬警報</strong><span>平面圖上方顯示警報文字</span></div>
               <div className="preview-alarm-list">
@@ -400,7 +400,7 @@ function SettingsApp(): JSX.Element {
               </div>
             </section>
           )}
-          <section className={`canvas-card${isPreviewEnabled && selectedMarker !== null ? ' has-alarm' : ''}`} aria-label="平面圖畫布">
+          <section className={`canvas-card${isPreviewEnabled && selectedMarker !== null && selectedMarker.shouldShowOnlyImage !== true ? ' has-alarm' : ''}${isPreviewEnabled && selectedMarker?.shouldShowOnlyImage === true ? ' is-image-only' : ''}`} aria-label="平面圖畫布">
             <PlanCanvas page={selectedPage} marker={selectedMarker} previewEnabled={isPreviewEnabled} onMoveMarker={(markerId: string, x: number, y: number) => changeMarker(markerId, { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 })} />
           </section>
           {selectedPage && <div className="canvas-caption"><span>拖曳圖示調整位置</span><span className="caption-separator">·</span><span>座標依原圖比例保存</span><span className="caption-spacer" /><span>{selectedPage.imageUrl ? '圖片比例自動適應' : '支援 PNG、JPEG'}</span></div>}

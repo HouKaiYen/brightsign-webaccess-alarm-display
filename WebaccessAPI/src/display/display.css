@@ -199,6 +199,8 @@ html, body, #display-root {
 .alarm-message { display: flex; align-items: center; justify-content: center; gap: 18px; width: 100%; }
 .alarm-exit-icon { flex: 0 0 auto; width: 76px; height: 76px; object-fit: contain; }
 .alarm-exit-icon[hidden] { display: none !important; }
+.display-screen.is-image-only .plan-viewport { padding: 0; align-items: center; }
+.display-screen.is-image-only .floor-plan-layer, .display-screen.is-image-only .floor-plan-image { border-radius: 0; }
 @media (max-width: 480px) { .alarm-message { gap: 10px; } .alarm-exit-icon { width: 48px; height: 48px; } }
 
 .idle-message[hidden] { display: none !important; }

@@ -19,6 +19,7 @@ export interface AlarmMarker {
   color: string;
   shouldBlink: boolean;
   shouldShowExitIcon?: boolean;
+  shouldShowOnlyImage?: boolean;
   iconKind: IconKind;
   iconUrl: string;
 }

@@ -350,3 +350,5 @@ input, textarea, select { color: var(--text); }
 .preview-alarm-item > span:not(.preview-alarm-point) { white-space: pre-wrap; text-align: center; overflow-wrap: anywhere; }
 
 .preview-exit-icon { flex: 0 0 auto; width: 56px; height: 56px; object-fit: contain; margin-left: 10px; }
+.canvas-card.is-image-only { border-color: transparent; background: #000; }
+.canvas-card.is-image-only .plan-stage-image { border-radius: 0; }

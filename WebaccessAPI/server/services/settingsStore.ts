@@ -329,6 +329,7 @@ export class SettingsStore {
       typeof marker.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(marker.color) ||
       typeof marker.shouldBlink !== 'boolean' ||
       (marker.shouldShowExitIcon !== undefined && typeof marker.shouldShowExitIcon !== 'boolean') ||
+      (marker.shouldShowOnlyImage !== undefined && typeof marker.shouldShowOnlyImage !== 'boolean') ||
       !['sos', 'warning', 'circle', 'push-button', 'custom'].includes(marker.iconKind) || typeof marker.iconUrl !== 'string') {
       throw new SettingsValidationError('警報標記欄位或座標、尺寸、顏色格式無效。');
     }
