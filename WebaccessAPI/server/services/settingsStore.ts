@@ -329,12 +329,9 @@ export class SettingsStore {
       typeof marker.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(marker.color) ||
       typeof marker.shouldBlink !== 'boolean' ||
       (marker.shouldShowExitIcon !== undefined && typeof marker.shouldShowExitIcon !== 'boolean') ||
-      (marker.shouldShowOnlyExitIcon !== undefined && typeof marker.shouldShowOnlyExitIcon !== 'boolean') ||
+      (marker.shouldShowOnlyImage !== undefined && typeof marker.shouldShowOnlyImage !== 'boolean') ||
       !['sos', 'warning', 'circle', 'push-button', 'custom'].includes(marker.iconKind) || typeof marker.iconUrl !== 'string') {
       throw new SettingsValidationError('警報標記欄位或座標、尺寸、顏色格式無效。');
-    }
-    if (marker.shouldShowOnlyExitIcon === true && marker.shouldShowExitIcon !== true) {
-      throw new SettingsValidationError(`只顯示 EXIT 圖片的警報「${marker.name}」必須啟用 EXIT 圖示。`);
     }
     if (marker.iconKind === 'custom' && marker.iconUrl === '') {
       throw new SettingsValidationError(`自訂警報圖示「${marker.name}」尚未上傳圖片。`);
