@@ -117,7 +117,7 @@ export function PlanCanvas({ page, marker, previewEnabled, onMoveMarker }: PlanC
           className="marker-layer"
           style={{ left: imageBounds.left, top: imageBounds.top, width: imageBounds.width, height: imageBounds.height } as CSSProperties}
         >
-          {marker !== null && marker.pageId === page.id && marker.shouldShowExitIcon !== true && (
+          {marker !== null && marker.pageId === page.id && (!previewEnabled || marker.shouldShowExitIcon !== true) && (
               <button
                 key={marker.id}
                 className="plan-marker is-selected"

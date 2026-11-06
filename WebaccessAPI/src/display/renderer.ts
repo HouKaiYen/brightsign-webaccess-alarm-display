@@ -11,6 +11,7 @@ interface AlarmElements {
   element: HTMLDivElement;
   text: HTMLSpanElement;
   exitIcon: HTMLImageElement;
+  time: HTMLTimeElement;
 }
 
 const namespace: 'http://www.w3.org/2000/svg' = 'http://www.w3.org/2000/svg';
@@ -283,18 +284,20 @@ export class DisplayRenderer {
         exitIcon.hidden = true;
         message.append(text, exitIcon);
         element.append(message, time);
-        row = { element, text, exitIcon };
+        row = { element, text, exitIcon, time };
         this._alarmElements.set(id, row);
       }
       row.exitIcon.hidden = marker.shouldShowExitIcon !== true;
+      row.text.hidden = marker.shouldShowOnlyExitIcon === true;
+      row.time.hidden = marker.shouldShowOnlyExitIcon === true;
+      row.element.classList.toggle('is-image-only', marker.shouldShowOnlyExitIcon === true);
       const text: string = getAlarmText(marker, alarm);
       if (row.text.textContent !== text) {
         row.text.textContent = text;
       }
-      const timeElement: HTMLTimeElement = row.element.querySelector('time') as HTMLTimeElement;
       const timeText: string = alarm.time.length > 0 ? alarm.time : '';
-      if (timeElement.textContent !== timeText) {
-        timeElement.textContent = timeText;
+      if (row.time.textContent !== timeText) {
+        row.time.textContent = timeText;
       }
       desiredRows.push(row.element);
     }
