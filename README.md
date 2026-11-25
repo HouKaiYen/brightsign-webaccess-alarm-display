@@ -2,6 +2,11 @@
 
 Windows 免安裝的 WebAccess 警報平面圖與 BrightSign 顯示系統。
 
+> [!WARNING]
+> **此專案已棄用（Deprecated）且不再維護。** 
+> 建議改用 [新專案名稱](https://github.com/HouKaiYen/WebAccess-Media) 以獲得最新功能與安全性更新。
+
+
 ## 下載使用
 
 前往 [最新版本下載](https://github.com/HouKaiYen/brightsign-webaccess-alarm-display/releases/latest)。
